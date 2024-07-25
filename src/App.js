@@ -1,23 +1,46 @@
-import logo from './logo.svg';
 import './App.css';
 
+import { createClient } from '@supabase/supabase-js'
+import { useState, useEffect } from 'react';
+import DataTable from './DataTable';
+
+const supabaseUrl = 'https://rclumlmyqtxgmthpqsrj.supabase.co'
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+// Get all rows from table given table name
+const fetchAllRows = async (tableName) => {
+  const { data, error } = await supabase
+    .from(tableName)
+    .select()
+
+  if (error) {
+    console.error('Error fetching data:', error)
+    return []
+  }
+
+  return data
+}
+
 function App() {
+  const [ classData, setClassData ] = useState([]);
+
+  // Get class table data on load
+  useEffect(() => {
+    const getData = async () => {
+      const tableData = await fetchAllRows('class')
+      setClassData(tableData)
+    }
+    
+    getData()
+  }, [])
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <main className='App-main'>
+        <DataTable data={classData}/>
+      </main>
+      
     </div>
   );
 }
